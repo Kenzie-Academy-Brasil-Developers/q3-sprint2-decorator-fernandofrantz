@@ -1,5 +1,7 @@
 from flask import Flask
 
+from decorators import verify_keys, verify_credentials
+
 app = Flask(__name__)
 if (__name__ == '__main__'):
     app.run()
@@ -13,10 +15,9 @@ app.config['JSON_SORT_KEYS'] = False
 #Rota de login
 #Status Code: 200 - OK, 400 - Bad Request ou 401 - Unauthorized;
 
-def verify_keys(trusted_keys: list[str]):
-    return ''
 
 @app.post('/login')
-@verify_keys([])
+@verify_credentials
+@verify_keys(['username','password'])
 def login():
     return ''
