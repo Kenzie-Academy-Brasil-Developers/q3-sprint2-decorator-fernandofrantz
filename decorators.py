@@ -30,6 +30,7 @@ def verify_keys(trusted_keys: list[str]):
         return wrapper
     return recebe_func
 
+
 def verify_credentials(func):
         @wraps(func)
         def wrapper():
@@ -48,10 +49,33 @@ def verify_credentials(func):
                         password = splited[1]
                     
                     if(post_request['username'] == username and post_request['password'] == password):
-                        message = {'msg': f'Seja bem vindo(a) {username}'}, 200
+                        message = {'msg': f'Bem vindo {username}'}, 200
                         return message
                     else:
-                        message = {'error': 'Usuário não autorizado'}, 401
+                        message = {'error': 'not authorized'}, 401
                 return message
             return func()
         return wrapper
+
+
+def verify_username(func):
+    @wraps(func)
+    def wrapper():
+        message = ''
+        post_request = request.get_json()
+        with open(f"./{DATABASE_FILENAME}", "r") as f:
+            all_lines = f.readlines()
+            for user_info in  all_lines:
+                username = user_info.split(':')[0]
+                if(post_request['username'] == username):
+                    message = {"error": "usuario já cadastrado!"}, 422
+            if(message == ''):
+                 with open(f"./{DATABASE_FILENAME}", "a") as f:
+                    formated_user = f'{post_request["username"]}:{post_request["password"]}'
+                    f.write("\n")
+                    f.write(formated_user)
+                    message = {"msg": f"Usuário {post_request['username']} criado com sucesso!"}, 201
+
+            return message
+        return func()
+    return wrapper
